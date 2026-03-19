@@ -1,0 +1,74 @@
+site_name: collegeplan
+site_description: A pure-Python college cost projection and savings planning engine
+site_author: Engineer Investor
+site_url: https://engineerinvestor.github.io/collegeplan/
+repo_url: https://github.com/engineerinvestor/collegeplan
+repo_name: engineerinvestor/collegeplan
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true
+            show_root_heading: true
+            members_order: source
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+  - Concepts:
+      - Overview: concepts/overview.md
+      - Cost Profiles: concepts/cost-profiles.md
+      - Glide Paths: concepts/glide-paths.md
+      - Sensitivity Analysis: concepts/sensitivity.md
+  - API Reference:
+      - api/index.md
+      - Models: api/models.md
+      - Engine: api/engine.md
+      - Solver: api/solver.md
+      - Sensitivity: api/sensitivity.md
+      - Reporting: api/reporting.md
+      - Cost Profiles: api/cost-profiles.md
+      - Glide Paths: api/glide-paths.md
+      - Allocation: api/allocation.md
+      - Assumptions: api/assumptions.md
+      - Validators: api/validators.md
+      - Exceptions: api/exceptions.md
+  - Changelog: changelog.md

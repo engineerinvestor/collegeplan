@@ -11,6 +11,7 @@ from collegeplan import (
     HouseholdFund,
     project_household_plan,
     solve_required_savings,
+    vanguard_target_enrollment,
 )
 
 
@@ -28,8 +29,12 @@ def solver_assumptions():
 def test_already_funded_returns_zero(zero_return_assumptions):
     profile = CostProfile(label="T", current_total_cost=10_000, annual_cost_growth=0.0)
     child = Child(
-        name="A", current_age=14, cost_profile=profile,
-        start_age=18, attendance_years=4, current_529_balance=40_000,
+        name="A",
+        current_age=14,
+        cost_profile=profile,
+        start_age=18,
+        attendance_years=4,
+        current_529_balance=40_000,
     )
     sol = solve_required_savings([child], zero_return_assumptions)
     assert sol.required_annual_contribution == 0.0
@@ -71,3 +76,21 @@ def test_shared_pool_mode(solver_child, solver_assumptions):
 def test_monthly_is_annual_over_12(solver_child, solver_assumptions):
     sol = solve_required_savings([solver_child], solver_assumptions)
     assert sol.required_monthly_contribution == pytest.approx(sol.required_annual_contribution / 12)
+
+
+def test_solver_with_glide_path(solver_assumptions):
+    """Required savings is higher with a glide path than flat 7% (lower effective return)."""
+    profile = CostProfile(label="Test", current_total_cost=25_000, annual_cost_growth=0.04)
+    child_flat = Child(
+        name="Flat",
+        current_age=10,
+        cost_profile=profile,
+        start_age=18,
+        attendance_years=4,
+    )
+    child_gp = replace(child_flat, name="GP", glide_path=vanguard_target_enrollment())
+
+    sol_flat = solve_required_savings([child_flat], solver_assumptions)
+    sol_gp = solve_required_savings([child_gp], solver_assumptions)
+
+    assert sol_gp.required_monthly_contribution > sol_flat.required_monthly_contribution

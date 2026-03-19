@@ -1,5 +1,7 @@
 """Tests for the projection engine — the core simulation logic."""
 
+from dataclasses import replace
+
 import pytest
 
 from collegeplan import (
@@ -10,6 +12,7 @@ from collegeplan import (
     HouseholdFund,
     project_child_plan,
     project_household_plan,
+    vanguard_target_enrollment,
 )
 
 
@@ -32,6 +35,7 @@ class TestSingleChildProjection:
     def test_contributions_accumulate_zero_return(self, simple_child, zero_return_assumptions):
         """Contributions accumulate with no compounding noise at 0% return."""
         from dataclasses import replace
+
         child = replace(simple_child, annual_contribution=5_000)
         result = project_child_plan(child, zero_return_assumptions)
         # 8 years total (4 pre + 4 attendance), $5k/yr = $40k contributed
@@ -48,8 +52,12 @@ class TestSingleChildProjection:
         """Balance never goes negative — withdrawal capped at available funds."""
         profile = CostProfile(label="Expensive", current_total_cost=100_000, annual_cost_growth=0.0)
         child = Child(
-            name="C", current_age=17, cost_profile=profile,
-            start_age=18, attendance_years=2, current_529_balance=50_000,
+            name="C",
+            current_age=17,
+            cost_profile=profile,
+            start_age=18,
+            attendance_years=2,
+            current_529_balance=50_000,
         )
         result = project_child_plan(child, zero_return_assumptions)
         # Cost = 200k, balance = 50k. Year 0 covers 50k of 100k, year 1 covers 0.
@@ -61,10 +69,12 @@ class TestSingleChildProjection:
     def test_boy_vs_eoy_timing(self, simple_child):
         """BOY timing grows contributions during the year they're made."""
         from dataclasses import replace
+
         child = replace(simple_child, annual_contribution=10_000, current_529_balance=0.0)
         a_nom = Assumptions(expected_return_nominal=0.10, general_inflation=0.0)
         a_boy = Assumptions(
-            expected_return_nominal=0.10, general_inflation=0.0,
+            expected_return_nominal=0.10,
+            general_inflation=0.0,
             contribution_timing=ContributionTiming.BEGINNING_OF_YEAR,
         )
 
@@ -80,6 +90,7 @@ class TestSingleChildProjection:
     def test_scholarship_pct_reduces_cost(self, simple_child, zero_return_assumptions):
         """scholarship_pct reduces each year's cost proportionally."""
         from dataclasses import replace
+
         child = replace(simple_child, scholarship_pct=0.5)
         result = project_child_plan(child, zero_return_assumptions)
         assert result.projected_total_cost == pytest.approx(4 * 5_000)
@@ -87,6 +98,7 @@ class TestSingleChildProjection:
     def test_scholarship_offset_reduces_cost(self, simple_child, zero_return_assumptions):
         """scholarship_offset reduces cost by a fixed dollar amount."""
         from dataclasses import replace
+
         child = replace(simple_child, scholarship_offset=2_000)
         result = project_child_plan(child, zero_return_assumptions)
         assert result.projected_total_cost == pytest.approx(4 * 8_000)
@@ -98,6 +110,30 @@ class TestSingleChildProjection:
     def test_first_year_cost(self, simple_child, zero_return_assumptions):
         result = project_child_plan(simple_child, zero_return_assumptions)
         assert result.projected_first_year_cost == pytest.approx(10_000)
+
+    def test_glide_path_lower_funded_amount(self, nominal_assumptions):
+        """A glide path produces a lower funded amount than a flat 7% return."""
+        profile = CostProfile(label="T", current_total_cost=25_000, annual_cost_growth=0.04)
+        child_flat = Child(
+            name="Flat",
+            current_age=10,
+            cost_profile=profile,
+            start_age=18,
+            attendance_years=4,
+            current_529_balance=30_000,
+        )
+        child_gp = replace(child_flat, name="GP", glide_path=vanguard_target_enrollment())
+
+        result_flat = project_child_plan(child_flat, nominal_assumptions)
+        result_gp = project_child_plan(child_gp, nominal_assumptions)
+
+        assert result_gp.funded_amount < result_flat.funded_amount
+
+    def test_glide_path_none_backward_compatible(self, simple_child, zero_return_assumptions):
+        """Existing projections unchanged when glide_path is None."""
+        result = project_child_plan(simple_child, zero_return_assumptions)
+        assert result.projected_total_cost == pytest.approx(4 * 10_000)
+        assert result.funded_amount == 0.0
 
 
 class TestHouseholdProjection:

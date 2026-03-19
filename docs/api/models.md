@@ -1,0 +1,3 @@
+# Models
+
+::: collegeplan.models

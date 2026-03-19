@@ -16,7 +16,7 @@ A pure-Python, zero-dependency college cost projection and savings planning engi
 
 ## Git Configuration
 
-- **Remote:** https://github.com/engineerinvestor/lifecycle-allocation
+- **Remote:** https://github.com/engineerinvestor/collegeplan
 - **Commit as:** Engineer Investor (`egr.investor@gmail.com`)
 - Always use `git -c user.name="Engineer Investor" -c user.email="egr.investor@gmail.com" commit` when committing
 

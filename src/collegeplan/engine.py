@@ -6,6 +6,7 @@ from dataclasses import replace
 
 from .allocation import allocate_shared_withdrawal
 from .assumptions import resolve_nominal_return
+from .glide_path import get_return_for_year
 from .models import (
     Assumptions,
     Child,
@@ -53,7 +54,6 @@ def project_child_plan(
     validate_child(child)
     validate_assumptions(assumptions)
 
-    nominal_return = resolve_nominal_return(assumptions)
     inflation = assumptions.general_inflation
     years_to_start = _years_until_start(child)
     horizon = years_to_start + child.attendance_years
@@ -68,6 +68,7 @@ def project_child_plan(
     first_year_cost = 0.0
 
     for y in range(horizon):
+        nominal_return = get_return_for_year(child, assumptions, y)
         beginning = balance
         cost = _project_annual_cost(child, y, inflation) if y in attendance_offsets else 0.0
 
@@ -140,18 +141,14 @@ def project_household_plan(
     inflation = assumptions.general_inflation
 
     # Determine horizon
-    horizon = max(
-        _years_until_start(c) + c.attendance_years for c in children
-    )
+    horizon = max(_years_until_start(c) + c.attendance_years for c in children)
 
     # Sort children by years-to-start for priority ordering
     sorted_children = sorted(children, key=lambda c: _years_until_start(c))
     priority_order = [c.name for c in sorted_children]
 
     # Run per-child projections (without shared fund)
-    child_results_no_shared = {
-        c.name: project_child_plan(c, assumptions) for c in children
-    }
+    child_results_no_shared = {c.name: project_child_plan(c, assumptions) for c in children}
 
     # Build per-child attendance schedule and cost lookup
     child_attendance: dict[str, set[int]] = {}

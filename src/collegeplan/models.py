@@ -45,6 +45,26 @@ class CostProfile:
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class GlidePathStep:
+    """Asset allocation at a years-to-enrollment threshold."""
+
+    years_to_enrollment: int  # upper bound (inclusive)
+    equity_pct: float  # 0-1
+    bond_pct: float  # 0-1
+    short_term_pct: float  # 0-1
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class GlidePath:
+    """Age-based asset allocation schedule with per-class return assumptions."""
+
+    steps: tuple[GlidePathStep, ...]  # sorted descending by years_to_enrollment
+    equity_return: float  # nominal expected return for equities
+    bond_return: float  # nominal expected return for bonds
+    short_term_return: float  # nominal expected return for cash/short-term
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Child:
     """One future student and their per-child funding details."""
 
@@ -57,6 +77,7 @@ class Child:
     annual_contribution: float = 0.0
     scholarship_offset: float = 0.0  # current dollars, annual
     scholarship_pct: float = 0.0  # 0-1, applied after cost projection
+    glide_path: GlidePath | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
