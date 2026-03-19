@@ -27,8 +27,7 @@ def _run_with_contribution(
         n = len(children)
         per_child = annual_contribution / n
         modified = [
-            replace(c, annual_contribution=c.annual_contribution + per_child)
-            for c in children
+            replace(c, annual_contribution=c.annual_contribution + per_child) for c in children
         ]
         hf = household_fund
     else:  # shared_pool
@@ -76,9 +75,7 @@ def solve_required_savings(
     validate_plan(children, assumptions, household_fund)
 
     # Check if already funded with zero additional contribution
-    current_ratio = _run_with_contribution(
-        children, assumptions, household_fund, 0.0, solve_mode
-    )
+    current_ratio = _run_with_contribution(children, assumptions, household_fund, 0.0, solve_mode)
     if current_ratio >= target_funding_ratio:
         n = len(children)
         return SavingsSolution(
@@ -99,26 +96,20 @@ def solve_required_savings(
     upper = total_cost / min_years
 
     # Verify upper bound is sufficient
-    upper_ratio = _run_with_contribution(
-        children, assumptions, household_fund, upper, solve_mode
-    )
+    upper_ratio = _run_with_contribution(children, assumptions, household_fund, upper, solve_mode)
     while upper_ratio < target_funding_ratio:
         upper *= 2
         upper_ratio = _run_with_contribution(
             children, assumptions, household_fund, upper, solve_mode
         )
         if upper > total_cost * 10:
-            raise SolverError(
-                "Cannot find a feasible contribution within reasonable bounds"
-            )
+            raise SolverError("Cannot find a feasible contribution within reasonable bounds")
 
     # Bisection
     lo, hi = 0.0, upper
     for _ in range(max_iterations):
         mid = (lo + hi) / 2
-        ratio = _run_with_contribution(
-            children, assumptions, household_fund, mid, solve_mode
-        )
+        ratio = _run_with_contribution(children, assumptions, household_fund, mid, solve_mode)
         if ratio < target_funding_ratio:
             lo = mid
         else:
@@ -126,9 +117,7 @@ def solve_required_savings(
         if hi - lo < tolerance:
             break
     else:
-        raise SolverError(
-            f"Solver did not converge after {max_iterations} iterations"
-        )
+        raise SolverError(f"Solver did not converge after {max_iterations} iterations")
 
     annual = (lo + hi) / 2
     monthly = annual / 12
@@ -136,9 +125,7 @@ def solve_required_savings(
     per_child = {c.name: annual / n for c in children}
 
     # Verify achieved ratio
-    achieved = _run_with_contribution(
-        children, assumptions, household_fund, annual, solve_mode
-    )
+    achieved = _run_with_contribution(children, assumptions, household_fund, annual, solve_mode)
 
     return SavingsSolution(
         required_annual_contribution=annual,

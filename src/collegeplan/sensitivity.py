@@ -76,21 +76,24 @@ def run_sensitivity(
                 ]
             elif key == "scholarship_pct":
                 mod_children = [
-                    replace(c, scholarship_pct=value, scholarship_offset=0.0)
-                    for c in mod_children
+                    replace(c, scholarship_pct=value, scholarship_offset=0.0) for c in mod_children
                 ]
             elif key == "target_funding_ratio":
                 mod_target = value
 
         solution = solve_required_savings(
-            mod_children, mod_assumptions, household_fund,
+            mod_children,
+            mod_assumptions,
+            household_fund,
             target_funding_ratio=mod_target,
         )
 
         household_result = None
         if include_projection:
             household_result = project_household_plan(
-                mod_children, mod_assumptions, household_fund,
+                mod_children,
+                mod_assumptions,
+                household_fund,
             )
 
         cases.append(

@@ -61,7 +61,8 @@ def test_golden_two_children_household():
     )
     assumptions = Assumptions(expected_return_nominal=0.07, general_inflation=0.03)
     hf = HouseholdFund(
-        shared_balance=20_000, shared_annual_contribution=5_000,
+        shared_balance=20_000,
+        shared_annual_contribution=5_000,
         allocation_policy=AllocationPolicy.PROPORTIONAL_TO_NEED,
     )
     result = project_household_plan([c1, c2], assumptions, hf)

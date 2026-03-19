@@ -20,9 +20,7 @@ def test_equal_split_capped_at_need():
 
 def test_oldest_first():
     needs = {"A": 500, "B": 800}
-    result = allocate_shared_withdrawal(
-        AllocationPolicy.OLDEST_FIRST, 1000, needs, ["A", "B"]
-    )
+    result = allocate_shared_withdrawal(AllocationPolicy.OLDEST_FIRST, 1000, needs, ["A", "B"])
     assert result["A"] == 500
     assert result["B"] == 500  # remainder after A is fully funded
 

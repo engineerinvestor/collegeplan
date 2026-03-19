@@ -1,6 +1,5 @@
 """Tests for assumptions normalization (Fisher equation)."""
 
-
 from collegeplan import Assumptions, deflate, normalize_assumptions
 from collegeplan.assumptions import resolve_nominal_return, resolve_real_return
 

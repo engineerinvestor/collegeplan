@@ -26,8 +26,12 @@ def test_to_dict_rounds_dollars():
 def test_to_dict_preserves_ratios():
     profile = CostProfile(label="T", current_total_cost=10_000, annual_cost_growth=0.05)
     child = Child(
-        name="A", current_age=14, cost_profile=profile,
-        start_age=18, attendance_years=4, current_529_balance=20_000,
+        name="A",
+        current_age=14,
+        cost_profile=profile,
+        start_age=18,
+        attendance_years=4,
+        current_529_balance=20_000,
     )
     assumptions = Assumptions(expected_return_nominal=0.07, general_inflation=0.03)
     result = project_child_plan(child, assumptions)
