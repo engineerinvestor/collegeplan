@@ -5,6 +5,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/collegeplan)](https://pypi.org/project/collegeplan/)
 [![License](https://img.shields.io/github/license/engineerinvestor/collegeplan)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://engineerinvestor.github.io/collegeplan/)
+[![Downloads](https://img.shields.io/pypi/dm/collegeplan)](https://pypi.org/project/collegeplan/)
 
 A pure-Python, zero-dependency college cost projection and savings planning engine.
 
