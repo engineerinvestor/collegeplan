@@ -61,7 +61,7 @@ def to_dataframe(result: Any) -> Any:
     Raises ``ImportError`` with a helpful message when pandas is not installed.
     """
     try:
-        import pandas as pd
+        import pandas as pd  # type: ignore[import-untyped,unused-ignore]
     except ImportError:
         raise ImportError(
             "pandas is required for to_dataframe(). "
