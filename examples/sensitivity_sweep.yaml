@@ -1,0 +1,24 @@
+# Sensitivity analysis across return and inflation scenarios.
+# Run with: collegeplan sensitivity examples/sensitivity_sweep.yaml
+
+assumptions:
+  expected_return_nominal: 0.07
+  general_inflation: 0.03
+
+children:
+  - name: Charlie
+    current_age: 8
+    start_age: 18
+    attendance_years: 4
+    current_529_balance: 15000
+    annual_contribution: 5000
+    cost_profile:
+      label: Public Out-of-State (4-year)
+      current_total_cost: 45000
+      annual_cost_growth: 0.045
+
+sensitivity:
+  target_funding_ratio: 1.0
+  grid:
+    expected_return_nominal: [0.05, 0.07, 0.09]
+    general_inflation: [0.02, 0.03, 0.04]

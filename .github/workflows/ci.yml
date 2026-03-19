@@ -33,4 +33,4 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
-      - run: pytest --cov=collegeplan --cov-report=xml --cov-report=term-missing
+      - run: pytest --cov=collegeplan --cov-report=xml --cov-report=term-missing --cov-fail-under=85
