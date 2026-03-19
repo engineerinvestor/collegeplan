@@ -81,6 +81,7 @@ def _build_child(data: dict[str, Any]) -> Child:
         attendance_years=int(data.get("attendance_years", 4)),
         current_529_balance=float(data.get("current_529_balance", 0.0)),
         annual_contribution=float(data.get("annual_contribution", 0.0)),
+        contribution_growth_rate=float(data.get("contribution_growth_rate", 0.0)),
         scholarship_offset=float(data.get("scholarship_offset", 0.0)),
         scholarship_pct=float(data.get("scholarship_pct", 0.0)),
         glide_path=glide_path,
@@ -111,6 +112,7 @@ def _build_household_fund(data: dict[str, Any]) -> HouseholdFund:
     return HouseholdFund(
         shared_balance=float(data.get("shared_balance", 0.0)),
         shared_annual_contribution=float(data.get("shared_annual_contribution", 0.0)),
+        contribution_growth_rate=float(data.get("contribution_growth_rate", 0.0)),
         allocation_policy=policy,
     )
 

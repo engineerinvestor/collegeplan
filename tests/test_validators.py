@@ -8,6 +8,7 @@ from collegeplan import (
     CostProfile,
     GlidePath,
     GlidePathStep,
+    HouseholdFund,
     ValidationError,
     vanguard_target_enrollment,
 )
@@ -16,6 +17,7 @@ from collegeplan.validators import (
     validate_child,
     validate_cost_profile,
     validate_glide_path,
+    validate_household_fund,
 )
 
 
@@ -97,3 +99,39 @@ def test_validate_glide_path_negative_pct():
     gp = GlidePath(steps=steps, equity_return=0.10, bond_return=0.04, short_term_return=0.02)
     with pytest.raises(ValidationError, match="outside"):
         validate_glide_path(gp)
+
+
+def test_escalation_rate_too_high():
+    """contribution_growth_rate of 0.15 raises ValidationError."""
+    cp = CostProfile(label="X", current_total_cost=1000, annual_cost_growth=0.03)
+    with pytest.raises(ValidationError, match="contribution_growth_rate"):
+        validate_child(
+            Child(name="A", current_age=10, cost_profile=cp, contribution_growth_rate=0.15)
+        )
+
+
+def test_escalation_rate_too_low():
+    """contribution_growth_rate of -0.10 raises ValidationError."""
+    cp = CostProfile(label="X", current_total_cost=1000, annual_cost_growth=0.03)
+    with pytest.raises(ValidationError, match="contribution_growth_rate"):
+        validate_child(
+            Child(name="A", current_age=10, cost_profile=cp, contribution_growth_rate=-0.10)
+        )
+
+
+def test_escalation_rate_boundary():
+    """-0.05 and 0.10 are accepted without error."""
+    cp = CostProfile(label="X", current_total_cost=1000, annual_cost_growth=0.03)
+    validate_child(Child(name="A", current_age=10, cost_profile=cp, contribution_growth_rate=-0.05))
+    validate_child(Child(name="A", current_age=10, cost_profile=cp, contribution_growth_rate=0.10))
+
+
+def test_hf_growth_rate_validation():
+    """HouseholdFund boundary checks for contribution_growth_rate."""
+    with pytest.raises(ValidationError, match="contribution_growth_rate"):
+        validate_household_fund(HouseholdFund(contribution_growth_rate=0.15))
+    with pytest.raises(ValidationError, match="contribution_growth_rate"):
+        validate_household_fund(HouseholdFund(contribution_growth_rate=-0.10))
+    # Boundaries should pass
+    validate_household_fund(HouseholdFund(contribution_growth_rate=-0.05))
+    validate_household_fund(HouseholdFund(contribution_growth_rate=0.10))

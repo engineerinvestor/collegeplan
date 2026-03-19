@@ -49,6 +49,7 @@ class TestBuildChild:
         assert child.start_age == 18
         assert child.attendance_years == 4
         assert child.current_529_balance == 0.0
+        assert child.contribution_growth_rate == 0.0
 
     def test_with_all_fields(self):
         data = {
@@ -68,6 +69,17 @@ class TestBuildChild:
         child = _build_child(data)
         assert child.current_529_balance == 25_000
         assert child.scholarship_pct == 0.25
+
+    def test_with_escalation(self):
+        data = {
+            "name": "Esc",
+            "current_age": 8,
+            "annual_contribution": 5_000,
+            "contribution_growth_rate": 0.03,
+            "cost_profile": {"current_total_cost": 30_000},
+        }
+        child = _build_child(data)
+        assert child.contribution_growth_rate == 0.03
 
 
 class TestBuildAssumptions:

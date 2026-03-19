@@ -36,6 +36,7 @@ def run_sensitivity(
             - "general_inflation"
             - "annual_cost_growth" (applied to all children)
             - "scholarship_pct" (applied to all children)
+            - "contribution_growth_rate" (applied to all children)
             - "target_funding_ratio"
         household_fund: Optional shared pool.
         target_funding_ratio: Default target if not varied in grid.
@@ -78,6 +79,8 @@ def run_sensitivity(
                 mod_children = [
                     replace(c, scholarship_pct=value, scholarship_offset=0.0) for c in mod_children
                 ]
+            elif key == "contribution_growth_rate":
+                mod_children = [replace(c, contribution_growth_rate=value) for c in mod_children]
             elif key == "target_funding_ratio":
                 mod_target = value
 

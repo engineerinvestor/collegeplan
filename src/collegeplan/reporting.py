@@ -19,6 +19,7 @@ _NO_ROUND_FIELDS = frozenset(
         "expected_return_real",
         "child_age",
         "target_funding_ratio",
+        "contribution_growth_rate",
     }
 )
 
@@ -49,6 +50,66 @@ def to_dict(result: Any) -> dict[str, Any]:
     """
     out: dict[str, Any] = _clean(result)
     return out
+
+
+def to_dataframe(result: Any) -> Any:
+    """Convert a projection result to a pandas DataFrame.
+
+    Accepts ``ChildProjectionResult``, ``HouseholdProjectionResult``,
+    or ``SensitivityResult``. Full float precision is preserved (no rounding).
+
+    Raises ``ImportError`` with a helpful message when pandas is not installed.
+    """
+    try:
+        import pandas as pd
+    except ImportError:
+        raise ImportError(
+            "pandas is required for to_dataframe(). "
+            "Install it with: pip install 'collegeplan[pandas]'"
+        ) from None
+
+    if dataclasses.is_dataclass(result) and not isinstance(result, type):
+        fields = {f.name for f in dataclasses.fields(result)}
+    else:
+        fields = set()
+
+    if "schedule" in fields and "child_name" in fields and "child_results" not in fields:
+        # ChildProjectionResult
+        rows = [dataclasses.asdict(rec) for rec in result.schedule]
+        return pd.DataFrame(rows)
+
+    if "child_results" in fields and "schedule" in fields:
+        # HouseholdProjectionResult
+        frames: list[Any] = []
+        for cr in result.child_results:
+            df = pd.DataFrame([dataclasses.asdict(rec) for rec in cr.schedule])
+            df["child_name"] = cr.child_name
+            frames.append(df)
+        shared_df = pd.DataFrame([dataclasses.asdict(rec) for rec in result.schedule])
+        shared_df["child_name"] = "shared_fund"
+        frames.append(shared_df)
+        return pd.concat(frames, ignore_index=True)
+
+    if "scenarios" in fields:
+        # SensitivityResult
+        rows_list: list[dict[str, Any]] = []
+        for case in result.scenarios:
+            row: dict[str, Any] = dict(case.parameters)
+            if case.savings_solution is not None:
+                row["required_annual_contribution"] = (
+                    case.savings_solution.required_annual_contribution
+                )
+                row["required_monthly_contribution"] = (
+                    case.savings_solution.required_monthly_contribution
+                )
+                row["achieved_funding_ratio"] = case.savings_solution.achieved_funding_ratio
+            rows_list.append(row)
+        return pd.DataFrame(rows_list)
+
+    raise TypeError(
+        f"Unsupported result type: {type(result).__name__}. "
+        "Expected ChildProjectionResult, HouseholdProjectionResult, or SensitivityResult."
+    )
 
 
 def to_json(result: Any, **kwargs: Any) -> str:

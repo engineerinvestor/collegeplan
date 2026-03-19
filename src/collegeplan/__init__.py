@@ -31,6 +31,7 @@ from .models import SavingsSolution as SavingsSolution
 from .models import SensitivityCase as SensitivityCase
 from .models import SensitivityResult as SensitivityResult
 from .models import YearRecord as YearRecord
+from .reporting import to_dataframe as to_dataframe
 from .reporting import to_dict as to_dict
 from .reporting import to_json as to_json
 from .sensitivity import run_sensitivity as run_sensitivity
@@ -70,6 +71,7 @@ __all__ = [
     "project_household_plan",
     "run_sensitivity",
     "solve_required_savings",
+    "to_dataframe",
     "to_dict",
     "to_json",
     "vanguard_target_enrollment",

@@ -75,6 +75,7 @@ class Child:
     attendance_years: int = 4
     current_529_balance: float = 0.0
     annual_contribution: float = 0.0
+    contribution_growth_rate: float = 0.0  # annual growth rate for contributions
     scholarship_offset: float = 0.0  # current dollars, annual
     scholarship_pct: float = 0.0  # 0-1, applied after cost projection
     glide_path: GlidePath | None = None
@@ -86,6 +87,7 @@ class HouseholdFund:
 
     shared_balance: float = 0.0
     shared_annual_contribution: float = 0.0
+    contribution_growth_rate: float = 0.0  # annual growth rate for contributions
     allocation_policy: AllocationPolicy = AllocationPolicy.EQUAL_SPLIT
 
 

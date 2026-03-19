@@ -136,6 +136,94 @@ class TestSingleChildProjection:
         assert result.funded_amount == 0.0
 
 
+class TestContributionEscalation:
+    def test_escalation_zero_matches_flat(self, simple_child, zero_return_assumptions):
+        """growth_rate=0.0 produces identical results to existing behavior."""
+        child_flat = replace(simple_child, annual_contribution=5_000)
+        child_zero = replace(simple_child, annual_contribution=5_000, contribution_growth_rate=0.0)
+        flat = project_child_plan(child_flat, zero_return_assumptions)
+        zero = project_child_plan(child_zero, zero_return_assumptions)
+        assert flat.funded_ratio == pytest.approx(zero.funded_ratio)
+        assert flat.funded_amount == pytest.approx(zero.funded_amount)
+
+    def test_escalation_increases_funding(self, zero_return_assumptions):
+        """Positive growth rate yields higher funded_ratio than flat."""
+        profile = CostProfile(label="T", current_total_cost=20_000, annual_cost_growth=0.0)
+        child_flat = Child(
+            name="Flat",
+            current_age=8,
+            cost_profile=profile,
+            start_age=18,
+            attendance_years=4,
+            annual_contribution=3_000,
+        )
+        child_esc = replace(child_flat, name="Esc", contribution_growth_rate=0.05)
+        flat = project_child_plan(child_flat, zero_return_assumptions)
+        esc = project_child_plan(child_esc, zero_return_assumptions)
+        assert esc.funded_ratio > flat.funded_ratio
+
+    def test_escalation_schedule_values(self, zero_return_assumptions):
+        """schedule[y].contribution == base * (1.03)^y with zero-return assumptions."""
+        profile = CostProfile(label="T", current_total_cost=10_000, annual_cost_growth=0.0)
+        child = Child(
+            name="E",
+            current_age=14,
+            cost_profile=profile,
+            start_age=18,
+            attendance_years=4,
+            annual_contribution=1_000,
+            contribution_growth_rate=0.03,
+        )
+        result = project_child_plan(child, zero_return_assumptions)
+        for rec in result.schedule:
+            expected = 1_000 * (1.03**rec.year_offset)
+            assert rec.contribution == pytest.approx(expected, rel=1e-9)
+
+    def test_escalation_household_shared(self, zero_return_assumptions):
+        """Shared fund contributions escalate correctly."""
+        profile = CostProfile(label="T", current_total_cost=10_000, annual_cost_growth=0.0)
+        child = Child(
+            name="A",
+            current_age=16,
+            cost_profile=profile,
+            start_age=18,
+            attendance_years=2,
+        )
+        hf = HouseholdFund(
+            shared_annual_contribution=5_000,
+            contribution_growth_rate=0.05,
+        )
+        result = project_household_plan([child], zero_return_assumptions, hf)
+        for rec in result.schedule:
+            expected = 5_000 * (1.05**rec.year_offset)
+            assert rec.contribution == pytest.approx(expected, rel=1e-9)
+
+    def test_escalation_boy_timing(self):
+        """BOY timing computes growth on (beginning + escalated_contribution)."""
+        profile = CostProfile(label="T", current_total_cost=10_000, annual_cost_growth=0.0)
+        child = Child(
+            name="BOY",
+            current_age=16,
+            cost_profile=profile,
+            start_age=18,
+            attendance_years=2,
+            annual_contribution=1_000,
+            contribution_growth_rate=0.05,
+            current_529_balance=10_000,
+        )
+        assumptions = Assumptions(
+            expected_return_nominal=0.10,
+            general_inflation=0.0,
+            contribution_timing=ContributionTiming.BEGINNING_OF_YEAR,
+        )
+        result = project_child_plan(child, assumptions)
+        rec0 = result.schedule[0]
+        # Year 0: contribution = 1000 * 1.05^0 = 1000
+        assert rec0.contribution == pytest.approx(1_000)
+        # BOY growth = (beginning + contribution) * return = (10000 + 1000) * 0.10 = 1100
+        assert rec0.growth == pytest.approx(1_100)
+
+
 class TestHouseholdProjection:
     def test_no_shared_fund_matches_individual(self, simple_child, zero_return_assumptions):
         """Household with no shared fund should match individual child projection."""

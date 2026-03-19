@@ -78,6 +78,25 @@ def test_monthly_is_annual_over_12(solver_child, solver_assumptions):
     assert sol.required_monthly_contribution == pytest.approx(sol.required_annual_contribution / 12)
 
 
+def test_solver_escalation_lower_initial(solver_child, solver_assumptions):
+    """With contribution growth, solver finds a lower initial contribution."""
+    sol_flat = solve_required_savings([solver_child], solver_assumptions)
+    child_esc = replace(solver_child, contribution_growth_rate=0.05)
+    sol_esc = solve_required_savings([child_esc], solver_assumptions)
+    assert sol_esc.required_annual_contribution < sol_flat.required_annual_contribution
+
+
+def test_solver_escalation_close_loop(solver_child, solver_assumptions):
+    """Feed solved contribution back with escalation, verify funding ratio achieved."""
+    child_esc = replace(solver_child, contribution_growth_rate=0.05)
+    sol = solve_required_savings([child_esc], solver_assumptions)
+    per_child_contrib = sol.per_child_suggestions[child_esc.name]
+    funded = replace(child_esc, annual_contribution=per_child_contrib)
+    result = project_household_plan([funded], solver_assumptions)
+    ratio = result.child_results[0].funded_ratio
+    assert ratio >= 0.999, f"Funding ratio {ratio} is below 0.999"
+
+
 def test_solver_with_glide_path(solver_assumptions):
     """Required savings is higher with a glide path than flat 7% (lower effective return)."""
     profile = CostProfile(label="Test", current_total_cost=25_000, annual_cost_growth=0.04)

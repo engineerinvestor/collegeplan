@@ -76,12 +76,11 @@ def project_child_plan(
             first_year_cost = cost
 
         # Contribution and growth depend on timing
+        contribution = child.annual_contribution * (1 + child.contribution_growth_rate) ** y
         if assumptions.contribution_timing == ContributionTiming.BEGINNING_OF_YEAR:
-            contribution = child.annual_contribution
             growth = (beginning + contribution) * nominal_return
         else:
             growth = beginning * nominal_return
-            contribution = child.annual_contribution
 
         available = beginning + growth + contribution
         withdrawal = min(cost, available)
@@ -171,12 +170,14 @@ def project_household_plan(
     for y in range(horizon):
         beginning = shared_balance
 
+        contrib = (
+            household_fund.shared_annual_contribution
+            * (1 + household_fund.contribution_growth_rate) ** y
+        )
         if assumptions.contribution_timing == ContributionTiming.BEGINNING_OF_YEAR:
-            contrib = household_fund.shared_annual_contribution
             growth = (beginning + contrib) * nominal_return
         else:
             growth = beginning * nominal_return
-            contrib = household_fund.shared_annual_contribution
 
         available = beginning + growth + contrib
 

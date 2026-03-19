@@ -13,6 +13,7 @@ children:
     attendance_years: 4
     current_529_balance: 30000
     annual_contribution: 5000
+    contribution_growth_rate: 0.03
     cost_profile:
       label: Private (4-year)
       current_total_cost: 65000
@@ -24,6 +25,7 @@ children:
     attendance_years: 4
     current_529_balance: 10000
     annual_contribution: 3000
+    contribution_growth_rate: 0.03
     cost_profile:
       label: Public In-State (4-year)
       current_total_cost: 28000
@@ -32,6 +34,7 @@ children:
 household_fund:
   shared_balance: 20000
   shared_annual_contribution: 5000
+  contribution_growth_rate: 0.03
   allocation_policy: proportional_to_need
 
 solve:

@@ -29,6 +29,11 @@ def validate_child(child: Child) -> None:
         raise ValidationError("current_529_balance must be non-negative")
     if child.annual_contribution < 0:
         raise ValidationError("annual_contribution must be non-negative")
+    if not -0.05 <= child.contribution_growth_rate <= 0.10:
+        raise ValidationError(
+            f"contribution_growth_rate {child.contribution_growth_rate} is outside "
+            "the plausible range [-0.05, 0.10]"
+        )
     if child.scholarship_offset < 0:
         raise ValidationError("scholarship_offset must be non-negative")
     if not 0 <= child.scholarship_pct <= 1:
@@ -91,6 +96,11 @@ def validate_household_fund(fund: HouseholdFund) -> None:
         raise ValidationError("shared_balance must be non-negative")
     if fund.shared_annual_contribution < 0:
         raise ValidationError("shared_annual_contribution must be non-negative")
+    if not -0.05 <= fund.contribution_growth_rate <= 0.10:
+        raise ValidationError(
+            f"contribution_growth_rate {fund.contribution_growth_rate} is outside "
+            "the plausible range [-0.05, 0.10]"
+        )
 
 
 def validate_plan(

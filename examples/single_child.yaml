@@ -12,6 +12,7 @@ children:
     attendance_years: 4
     current_529_balance: 25000
     annual_contribution: 6000
+    contribution_growth_rate: 0.03
     cost_profile:
       label: Private (4-year)
       current_total_cost: 65000

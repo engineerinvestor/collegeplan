@@ -46,3 +46,12 @@ def test_higher_return_needs_less_savings(sweep_child, sweep_assumptions):
     low_return = result.scenarios[0].savings_solution
     high_return = result.scenarios[1].savings_solution
     assert high_return.required_annual_contribution < low_return.required_annual_contribution
+
+
+def test_sensitivity_escalation_sweep(sweep_child, sweep_assumptions):
+    """Higher growth rates produce lower required savings."""
+    grid = {"contribution_growth_rate": [0.0, 0.05]}
+    result = run_sensitivity([sweep_child], sweep_assumptions, grid)
+    no_growth = result.scenarios[0].savings_solution
+    with_growth = result.scenarios[1].savings_solution
+    assert with_growth.required_annual_contribution < no_growth.required_annual_contribution
